@@ -1,0 +1,11 @@
+#After STAR alignment . . . 
+
+samtools merge -@ 8 /N/slate/ealamb/SarahFASTQ/sailor/wt_mergedSD.bam wt_r1_Aligned.sortedByCoord.out.bam wt_r2_Aligned.sortedByCoord.out.bam wt_r3_Aligned.sortedByCoord.out.bam
+
+samtools merge -@ 8 /N/slate/ealamb/SarahFASTQ/sailor/6_mergedSD.bam 6_r1_Aligned.sortedByCoord.out.bam 6_r2_Aligned.sortedByCoord.out.bam 6_r3_Aligned.sortedByCoord.out.bam
+
+snakemake --snakefile /N/slate/ealamb/SarahFASTQ/sailor/workflow_sailor/Snakefile --configfile /N/slate/ealamb/SarahFASTQ/sailor/wt_mergedSD.json --use-singularity --singularity-args '--bind /N/slate/ealamb/SarahFASTQ --bind /N/slate/ealamb/SarahFASTQ/genome --bind /N/slate/ealamb/SarahFASTQ/sailor/workflow_sailor/scripts --bind /N/slate/ealamb/SarahFASTQ/sailor/workflow_sailor --bind /N/slate/ealamb/SarahFASTQ/results/WTflareM' -j1
+snakemake --snakefile /N/slate/ealamb/SarahFASTQ/sailor/workflow_sailor/Snakefile --configfile /N/slate/ealamb/SarahFASTQ/sailor/6_mergedSD.json --use-singularity --singularity-args '--bind /N/slate/ealamb/SarahFASTQ --bind /N/slate/ealamb/SarahFASTQ/genome --bind /N/slate/ealamb/SarahFASTQ/sailor/workflow_sailor/scripts --bind /N/slate/ealamb/SarahFASTQ/sailor/workflow_sailor --bind /N/slate/ealamb/SarahFASTQ/results/6flareM' -j1
+
+python3 annotator.sailor.py --gtf c_elegans.PRJNA13758.WS275.canonical_geneset.gtf --fwd wt_mergedSD.bam.fwd.readfiltered.formatted.varfiltered.snpfiltered.ranked.bed --rev wt_mergedSD.bam.rev.readfiltered.formatted.varfiltered.snpfiltered.ranked.bed --wb c.elegans.WS275.annotation.final.bed --o /N/slate/ealamb/SarahFASTQ/sailor/WTmergedSD.annotated.sites.csv
+python3 annotator.sailor.py --gtf c_elegans.PRJNA13758.WS275.canonical_geneset.gtf --fwd 6_mergedSD.bam.fwd.readfiltered.formatted.varfiltered.snpfiltered.ranked.bed --rev 6_mergedSD.bam.rev.readfiltered.formatted.varfiltered.snpfiltered.ranked.bed --wb c.elegans.WS275.annotation.final.bed --o /N/slate/ealamb/SarahFASTQ/sailor/6mergedSD.annotated.sites.csv
