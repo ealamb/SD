@@ -1,0 +1,54 @@
+
+BAMS=$(find ./results/aligned -name "*Aligned.sortedByCoord.out.bam")
+
+featureCounts -a genome/annotation.gtf -o ./results/aligned/counts/counts.tsv -t gene -g gene_id --largestOverlap --readExtension3 150 --primary -s 2 -T 8 ${BAMS}
+
+#Download alignments of WT and adr-2(-) reps and the counts.tsv file from featureCountsfrom ThinLinc in your local terminal
+scp ealamb@quartz.uits.iu.edu:/N/slate/ealamb/SarahFASTQ/sailor/6_r3_Aligned.sortedByCoord.out.bam ~/Desktop/
+
+#Open R studio and load the following libraries
+library(tidyverse)
+
+library(DESeq2)
+
+
+countdata <-read.table("/Users/emmalamb/Desktop/counts.tsv", header = TRUE, row.names = 1)
+
+countdata <- countdata[,6:ncol(countdata)]
+
+colnames(countdata)
+
+colnames(countdata) <- gsub("..results.aligned.","",colnames(countdata))
+colnames(countdata) <- gsub("6_r1_Aligned.sortedByCoord.out.bam","6.rep1",colnames(countdata))
+colnames(countdata) <- gsub("6_r2_Aligned.sortedByCoord.out.bam","6.rep2",colnames(countdata))
+colnames(countdata) <- gsub("6_r3_Aligned.sortedByCoord.out.bam","6.rep3",colnames(countdata))
+colnames(countdata) <- gsub("wt_r1_Aligned.sortedByCoord.out.bam","WT.rep1",colnames(countdata))
+colnames(countdata) <- gsub("wt_r2_Aligned.sortedByCoord.out.bam","WT.rep2",colnames(countdata))
+colnames(countdata) <- gsub("wt_r3_Aligned.sortedByCoord.out.bam","WT.rep3",colnames(countdata))
+
+
+countdata <- as.matrix(countdata)
+condition <- factor(c(rep("b",3),rep("a",3))
+countdata <- countdata[,c("6.rep1","6.rep2","6.rep3","WT.rep1","WT.rep2","WT.rep3")]
+(coldata <- data.frame(row.names=colnames(countdata),condition))
+
+dds <- DESeqDataSetFromMatrix(countData = countdata,colData = coldata, design=~condition)
+
+keep = rowSums(counts(dds)) >= 1
+
+dds <- dds[keep,]
+
+dds <- DESeq(dds)
+
+res <- results(dds)
+
+resdata <- merge(as.data.frame(res),as.data.frame(counts(dds,normalized=TRUE)),by="row.names",sort=FALSE)
+
+names(resdata)[1] <- "Gene"
+
+write.csv(resdata,file="/Users/emmalamb/Desktop/SD_L1neuralcellsdiffexp.csv")
+
+
+#open in excel and analyze
+
+
