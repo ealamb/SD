@@ -1,0 +1,23 @@
+##After you have deduplicated your bam files and have a .bed file with your region of interest, generate new modified bam files like this:
+
+
+INTRON_BED="introns.bed"
+
+for BAM in *dedup.bam; do
+    # Skip index files if present
+    [[ "$BAM" == *.bai ]] && continue
+
+    BASENAME=$(basename "$BAM" .bam)
+
+    echo "Processing $BAM..."
+
+    bedtools intersect \
+        -abam "$BAM" \
+        -b "$INTRON_BED" \
+        -u \
+    > "${BASENAME}.intronic.bam"
+
+    samtools index "${BASENAME}.intronic.bam"
+done
+
+##Proceed to DEseq in R
